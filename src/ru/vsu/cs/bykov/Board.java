@@ -1,6 +1,8 @@
 package ru.vsu.cs.bykov;
 
 
+import ru.vsu.cs.bykov.utils.GameStatus;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +76,7 @@ public class Board {
         }
     }
 
-    protected boolean moveInitialization() {
+    protected boolean moveInitializationConsole() {
         if (moves == 0) {
             isWindow = false;
         }
@@ -89,8 +91,8 @@ public class Board {
 
     }
 
-    void moveInitialization( int col, int row, int storedCol,
-                            int storedRow) {
+    void moveInitializationWindow(int col, int row, int storedCol,
+                                  int storedRow) {
         String peak = String.valueOf(Character.toChars(storedCol + 65)).concat(String.valueOf((storedRow + 1)));
         String hit = String.valueOf(Character.toChars(col + 65)).concat(String.valueOf((row + 1)));
         if ((moves % 2 == 0)) {
@@ -162,7 +164,7 @@ public class Board {
                 if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus() != null) {
                     if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus().getTeam() == color) {
                         messenger(GameStatus.MOVE_UNAVAILABLE);
-                        moveInitialization();
+                        moveInitializationConsole();
                         break;
                     } else if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus().getTeam() == enemy) {
                         Pawn fall = board[yPeak + i * yDirection][xPeak + i * xDirection].getStatus();
@@ -181,7 +183,7 @@ public class Board {
             streakCheck(hit, color);
         } else {
             messenger(GameStatus.SQUARE_UNAVAILABLE);
-            moveInitialization();
+            moveInitializationConsole();
         }
     }
 
@@ -214,7 +216,7 @@ public class Board {
                     } else {
                         messenger(GameStatus.MOVE_UNAVAILABLE);
                         if (!isWindow) {
-                            moveInitialization();
+                            moveInitializationConsole();
                         } else {
                             return false;
                         }
@@ -226,7 +228,7 @@ public class Board {
                     } else {
                         messenger(GameStatus.MOVE_UNAVAILABLE);
                         if (!isWindow) {
-                            moveInitialization();
+                            moveInitializationConsole();
                         } else {
                             return false;
                         }
@@ -234,7 +236,7 @@ public class Board {
                 } else {
                     messenger(GameStatus.MOVE_UNAVAILABLE);
                     if (!isWindow) {
-                        moveInitialization();
+                        moveInitializationConsole();
                     } else {
                         return false;
                     }
@@ -247,7 +249,7 @@ public class Board {
         } else {
             messenger(GameStatus.SQUARE_UNAVAILABLE);
             if (!isWindow) {
-                moveInitialization();
+                moveInitializationConsole();
             } else {
                 return false;
             }

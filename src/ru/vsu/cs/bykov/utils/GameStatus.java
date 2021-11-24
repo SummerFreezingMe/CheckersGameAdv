@@ -1,4 +1,4 @@
-package ru.vsu.cs.bykov;
+package ru.vsu.cs.bykov.utils;
 
 public enum GameStatus {
     CHOOSE_SQUARE,

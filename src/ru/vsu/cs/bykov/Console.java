@@ -3,7 +3,7 @@ package ru.vsu.cs.bykov;
 import java.awt.*;
 import java.util.Scanner;
 
-import static ru.vsu.cs.bykov.GameStatus.END_GAME;
+import static ru.vsu.cs.bykov.utils.GameStatus.END_GAME;
 
 public class Console {
 
@@ -20,7 +20,7 @@ public class Console {
         boolean endgame=false;
             while (!endgame) {
                 drawBoard(board.getBoard());
-                endgame=board.moveInitialization();
+                endgame=board.moveInitializationConsole();
             }
             board.messenger(END_GAME);
         }

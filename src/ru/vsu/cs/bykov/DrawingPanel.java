@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class DrawingPanel extends JPanel implements MouseListener {
-    private final int MAX_WIDTH = 825;
+    private final int MAX_WIDTH = 830;
     private final int MAX_HEIGHT = 600;
     private final int SQUARE_SIZE = 60;
     private boolean isChosen = false;
@@ -41,9 +41,9 @@ public class DrawingPanel extends JPanel implements MouseListener {
         g2d.drawRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
         g2d.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(640, 80, 170, 25);
+        g2d.fillRect(635, 80, 190, 25);
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(640, 80, 170, 25);
+        g2d.drawRect(635, 80, 190, 25);
         g2d.drawRect(SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE * 8, SQUARE_SIZE * 8);
         currentPlayer(g2d);
 
@@ -133,7 +133,7 @@ public class DrawingPanel extends JPanel implements MouseListener {
                 repaint();
                 return;
             }
-            b1.moveInitialization(col, row, storedCol, storedRow);
+            b1.moveInitializationWindow(col, row, storedCol, storedRow);
             model = b1.getBoard();
             restoreBoard();
             repaint();
