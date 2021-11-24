@@ -3,21 +3,24 @@ package ru.vsu.cs.bykov;
 import java.awt.*;
 
 public class Pawn {
+
+
+    private Color team;
+    private boolean isQueen = false;
+    private char XStart;
+    private int YStart;
+
+    public int getYStart() {
+        return YStart;
+    }
+
     public Color getTeam() {
         return team;
     }
 
     public void setTeam(Color team) {
-        this.team = team;
-    }
-
-    public Color team;
-    public boolean isQueen = false;
-    public char XStart;
-    public int YStart;
-
-    public int getYStart() {
-        return YStart;
+        if (team == Color.BLACK || team == Color.WHITE)
+            this.team = team;
     }
 
     public void setYStart(int YStart) {

@@ -4,33 +4,25 @@ import java.awt.*;
 
 public class Square {
     private Color clr;
-    Pawn status;
-    private char YStart;
-    private int X;
+    private Pawn status;
+    private final char yAxis;
+    private final int xAxis;
 
 
     public Square(char YAxis,int XAxis) {
-        this.YStart = YAxis;
-        this.X = XAxis;
+        this.yAxis = YAxis;
+        this.xAxis = XAxis;
         setClr(chooseColor(YAxis,XAxis));
 
     }
 
 
     public int getX() {
-        return X;
+        return xAxis;
     }
 
-    public void setX(int x) {
-        this.X = x;
-    }
-
-    public char getYStart() {
-        return YStart;
-    }
-
-    public void setYStart(char YStart) {
-        this.YStart = YStart;
+    public char getYAxis() {
+        return yAxis;
     }
 
     public Pawn getStatus() {

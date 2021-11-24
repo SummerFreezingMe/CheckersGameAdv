@@ -5,60 +5,60 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.font.FontRenderContext;
-import java.awt.font.GlyphVector;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.awt.image.ImageObserver;
-import java.awt.image.RenderedImage;
-import java.awt.image.renderable.RenderableImage;
 import java.io.File;
 import java.io.IOException;
-import java.text.AttributedCharacterIterator;
-import java.util.Map;
 import java.util.Objects;
 
 public class DrawingPanel extends JPanel implements MouseListener {
-    private final int MAX_WIDTH = 600;
+    private final int MAX_WIDTH = 825;
     private final int MAX_HEIGHT = 600;
     private final int SQUARE_SIZE = 60;
-    boolean isChosen = false;
-    Board b1 = new Board();
-    Square[][] model = b1.getBoard();
-    int moves = 0;
-    int storedCol = -1;
-    int storedRow = -1;
+    private boolean isChosen = false;
+    private final Board b1;
+    private Square[][] model;
+    // todo унификация moves
+    private int storedCol = -1;
+    private int storedRow = -1;
 
-    public DrawingPanel() {
+    public DrawingPanel(String playerOne, String playerTwo) {
+        b1 = new Board(playerOne, playerTwo);
+        model = b1.getBoard();
         setVisible(true);
-        setSize(new Dimension(MAX_WIDTH, MAX_HEIGHT));
+        setSize(new Dimension(MAX_WIDTH * 2, MAX_HEIGHT * 2));
         b1.createBoard();
+
     }
 
     @Override
     public void paint(Graphics g) {
-        //todo визуал
+
         Graphics2D g2d = (Graphics2D) g;
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setColor(Color.GRAY);
         g2d.drawRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
         g2d.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
-        String imagePath = "img/abc.png";
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(640, 80, 170, 25);
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(640, 80, 170, 25);
+        g2d.drawRect(SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE * 8, SQUARE_SIZE * 8);
+        currentPlayer(g2d);
+
+        String imagePathA = "img/abc.png";
+        String imagePathN = "img/123.png";
         try {
-            BufferedImage myPicture = ImageIO.read(new File(imagePath));
-            ImageObserver obs = new ImageObserver() {
-                @Override
-                public boolean imageUpdate(Image img, int info, int x, int y, int width, int height) {
-                    return false;
-                }
-            };
-            g2d.drawImage(myPicture, SQUARE_SIZE, MAX_HEIGHT - SQUARE_SIZE, obs);
+            BufferedImage lettersPic = ImageIO.read(new File(imagePathA));
+            BufferedImage numbersPic = ImageIO.read(new File(imagePathN));
+            ImageObserver obs = (img, info, x, y, width, height) -> false;
+            g2d.drawImage(lettersPic, SQUARE_SIZE, MAX_HEIGHT - SQUARE_SIZE, obs);
+            g2d.drawImage(numbersPic, MAX_HEIGHT - SQUARE_SIZE, SQUARE_SIZE, obs);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        g2d.drawRect(SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE * 8, SQUARE_SIZE * 8);
         for (int i = 0; i < Board.BOARD_SIZE; i++) {
             for (int j = 0; j < Board.BOARD_SIZE; j++) {
 
@@ -68,6 +68,19 @@ public class DrawingPanel extends JPanel implements MouseListener {
                 }
             }
         }
+        if (b1.getTeamWhite().isEmpty()) {
+            gameOver(g2d, b1.getSecondPlayerName());
+        } else if (b1.getTeamBlack().isEmpty()) {
+            gameOver(g2d, b1.getFirstPlayerName());
+        }
+    }
+
+
+    public void currentPlayer(Graphics2D g2d) {
+        Font font = new Font("Arial", Font.PLAIN, 18);
+        g2d.setFont(font);
+        String currPlayer = (b1.getMoves() % 2 == 0) ? b1.getFirstPlayerName() : b1.getSecondPlayerName();
+        g2d.drawString("Player's move: " + currPlayer, 640, 100);
     }
 
     public void restoreBoard() {
@@ -82,21 +95,25 @@ public class DrawingPanel extends JPanel implements MouseListener {
     public void paintSquare(Graphics g, Square sqr, Color clr) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(clr);
-        g2d.drawRect(SQUARE_SIZE + (sqr.getYStart() - 65) * SQUARE_SIZE, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
-        g2d.fillRect(SQUARE_SIZE + (sqr.getYStart() - 65) * SQUARE_SIZE, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.drawRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.fillRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
     }
 
-    //todo отрисовка дамки
     public void paintPawn(Graphics g, Square sqr) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.BLACK);
-        g2d.drawOval(SQUARE_SIZE + (sqr.getYStart() - 65) * SQUARE_SIZE, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
-        if (sqr.status.getTeam() == Color.WHITE) {
+        g2d.drawOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        if (sqr.getStatus().getTeam() == Color.WHITE) {
             g2d.setColor(Color.WHITE);
-        } else if (sqr.status.getTeam() == Color.BLACK) {
+        } else if (sqr.getStatus().getTeam() == Color.BLACK) {
             g2d.setColor(Color.RED);
         }
-        g2d.fillOval(SQUARE_SIZE + (sqr.getYStart() - 65) * SQUARE_SIZE, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        if (sqr.getStatus().isQueen()) {
+            g2d.setColor(Color.BLACK);
+            g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE + SQUARE_SIZE / 3, SQUARE_SIZE + (model.length - sqr.getX()) * SQUARE_SIZE + SQUARE_SIZE / 3, SQUARE_SIZE / 3, SQUARE_SIZE / 3);
+
+        }
     }
 
     @Override
@@ -106,7 +123,7 @@ public class DrawingPanel extends JPanel implements MouseListener {
 
         if (!isChosen) {
             isChosen = true;
-            displayAvailableMoves(row, col, model[row][col].status.team);
+            displayAvailableMoves(row, col, model[row][col].getStatus().getTeam());
             storedCol = col;
             storedRow = row;
         } else {
@@ -115,66 +132,86 @@ public class DrawingPanel extends JPanel implements MouseListener {
                 restoreBoard();
                 repaint();
                 return;
-
             }
-            b1.moveInitialization(moves, col, row, storedCol, storedRow);
+            b1.moveInitialization(col, row, storedCol, storedRow);
             model = b1.getBoard();
             restoreBoard();
             repaint();
-            moves++;
         }
-        System.out.println(col + " " + row);
+    }
 
+    private void gameOver(Graphics2D g2d, String winner) {
+        Font font = new Font("Arial", Font.PLAIN, 18);
+        g2d.setFont(font);
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(640, 80, 150, 25);
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("Победил игрок " + winner, 640, 100);
     }
 
     private void displayAvailableMoves(int row, int col, Color team) {
         int direction = (team == Color.BLACK) ? -1 : 1;
         Color rival = new Color(Math.abs(team.getRed() - 255), Math.abs(team.getRed() - 255), Math.abs(team.getRed() - 255));
-        if (col == 0) {
-            if (model[row + direction][col + 1].status == null) {
-                model[row + direction][col + 1].setClr(Color.GREEN);
-            }
-
-
-        } else if (col == 7) {
-            if (model[row + direction][col - 1].status == null) {
-                model[row + direction][col - 1].setClr(Color.GREEN);
+        if (model[row][col].getStatus().isQueen()) {
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if (Math.abs(i - row) == Math.abs(j - col)) {
+                        if (model[i][j].getStatus() == null) {
+                            model[i][j].setClr(Color.GREEN);
+                        }
+                    }
+                }
             }
         } else {
-            if (model[row + direction][col + 1].status == null) {
-                model[row + direction][col + 1].setClr(Color.GREEN);
-            }
-            if (model[row + direction][col - 1].status == null) {
-                model[row + direction][col - 1].setClr(Color.GREEN);
-            }
+            if (col == 0) {
+                if (model[row + direction][col + 1].getStatus() == null) {
+                    model[row + direction][col + 1].setClr(Color.GREEN);
+                }
 
 
-        }
-        if (row < 6 && col < 6) {
-            if (model[row + 1][col + 1].status != null) {
-                if (Objects.equals(model[row + 1][col + 1].status.team, rival) && model[row + 2][col + 2].status == null) {
-                    model[row + 2][col + 2].setClr(Color.PINK);
+            } else if (col == 7) {
+                if (model[row + direction][col - 1].getStatus() == null) {
+                    model[row + direction][col - 1].setClr(Color.GREEN);
+                }
+            } else {
+                if (model[row + direction][col + 1].getStatus() == null) {
+                    model[row + direction][col + 1].setClr(Color.GREEN);
+                }
+                if (model[row + direction][col - 1].getStatus() == null) {
+                    model[row + direction][col - 1].setClr(Color.GREEN);
+                }
+
+
+            }
+            if (row < 6 && col < 6) {
+                if (model[row + 1][col + 1].getStatus() != null) {
+                    if (Objects.equals(model[row + 1][col + 1].getStatus().getTeam(), rival) &&
+                            model[row + 2][col + 2].getStatus() == null) {
+                        model[row + 2][col + 2].setClr(Color.PINK);
+                    }
                 }
             }
-        }
-        if (row < 6 && col > 1) {
-            if (model[row + 1][col - 1].status != null) {
-                if (Objects.equals(model[row + 1][col - 1].status.team, rival) && model[row + 2][col - 2].status == null) {
-                    model[row + 2][col + 2].setClr(Color.PINK);
+            if (row < 6 && col > 1) {
+                if (model[row + 1][col - 1].getStatus() != null) {
+                    if (Objects.equals(model[row + 1][col - 1].getStatus().getTeam(), rival) &&
+                            model[row + 2][col - 2].getStatus() == null) {
+                        model[row + 2][col - 2].setClr(Color.PINK);
+                    }
                 }
             }
-        }
-        if (row > 1 && col < 6) {
-            if (model[row - 1][col + 1].status != null) {
-                if (Objects.equals(model[row - 1][col + 1].status.team, rival) && model[row - 2][col + 2].status == null) {
-                    model[row - 2][col + 2].setClr(Color.PINK);
+            if (row > 1 && col < 6) {
+                if (model[row - 1][col + 1].getStatus() != null) {
+                    if (Objects.equals(model[row - 1][col + 1].getStatus().getTeam(), rival) &&
+                            model[row - 2][col + 2].getStatus() == null) {
+                        model[row - 2][col + 2].setClr(Color.PINK);
+                    }
                 }
             }
-        }
-        if (row > 1 && col > 1) {
-            if (model[row - 1][col - 1].status != null) {
-                if (Objects.equals(model[row - 1][col - 1].status.team, rival) && model[row - 2][col - 2].status == null) {
-                    model[row - 2][col - 2].setClr(Color.PINK);
+            if (row > 1 && col > 1) {
+                if (model[row - 1][col - 1].getStatus() != null) {
+                    if (Objects.equals(model[row - 1][col - 1].getStatus().getTeam(), rival) && model[row - 2][col - 2].getStatus() == null) {
+                        model[row - 2][col - 2].setClr(Color.PINK);
+                    }
                 }
             }
         }
@@ -201,355 +238,7 @@ public class DrawingPanel extends JPanel implements MouseListener {
 
     }
 
-    Graphics2D g2d = new Graphics2D() {
-        @Override
-        public void draw(Shape s) {
-
-        }
-
-        @Override
-        public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
-            return false;
-        }
-
-        @Override
-        public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
-
-        }
-
-        @Override
-        public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
-
-        }
-
-        @Override
-        public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
-
-        }
-
-        @Override
-        public void drawString(String str, int x, int y) {
-
-        }
-
-        @Override
-        public void drawString(String str, float x, float y) {
-
-        }
-
-        @Override
-        public void drawString(AttributedCharacterIterator iterator, int x, int y) {
-
-        }
-
-        @Override
-        public void drawString(AttributedCharacterIterator iterator, float x, float y) {
-
-        }
-
-        @Override
-        public void drawGlyphVector(GlyphVector g, float x, float y) {
-
-        }
-
-        @Override
-        public void fill(Shape s) {
-
-        }
-
-        @Override
-        public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
-            return false;
-        }
-
-        @Override
-        public GraphicsConfiguration getDeviceConfiguration() {
-            return null;
-        }
-
-        @Override
-        public void setComposite(Composite comp) {
-
-        }
-
-        @Override
-        public void setPaint(Paint paint) {
-
-        }
-
-        @Override
-        public void setStroke(Stroke s) {
-
-        }
-
-        @Override
-        public void setRenderingHint(RenderingHints.Key hintKey, Object hintValue) {
-
-        }
-
-        @Override
-        public Object getRenderingHint(RenderingHints.Key hintKey) {
-            return null;
-        }
-
-        @Override
-        public void setRenderingHints(Map<?, ?> hints) {
-
-        }
-
-        @Override
-        public void addRenderingHints(Map<?, ?> hints) {
-
-        }
-
-        @Override
-        public RenderingHints getRenderingHints() {
-            return null;
-        }
-
-        @Override
-        public void translate(int x, int y) {
-
-        }
-
-        @Override
-        public void translate(double tx, double ty) {
-
-        }
-
-        @Override
-        public void rotate(double theta) {
-
-        }
-
-        @Override
-        public void rotate(double theta, double x, double y) {
-
-        }
-
-        @Override
-        public void scale(double sx, double sy) {
-
-        }
-
-        @Override
-        public void shear(double shx, double shy) {
-
-        }
-
-        @Override
-        public void transform(AffineTransform Tx) {
-
-        }
-
-        @Override
-        public void setTransform(AffineTransform Tx) {
-
-        }
-
-        @Override
-        public AffineTransform getTransform() {
-            return null;
-        }
-
-        @Override
-        public Paint getPaint() {
-            return null;
-        }
-
-        @Override
-        public Composite getComposite() {
-            return null;
-        }
-
-        @Override
-        public void setBackground(Color color) {
-
-        }
-
-        @Override
-        public Color getBackground() {
-            return null;
-        }
-
-        @Override
-        public Stroke getStroke() {
-            return null;
-        }
-
-        @Override
-        public void clip(Shape s) {
-
-        }
-
-        @Override
-        public FontRenderContext getFontRenderContext() {
-            return null;
-        }
-
-        @Override
-        public Graphics create() {
-            return null;
-        }
-
-        @Override
-        public Color getColor() {
-            return null;
-        }
-
-        @Override
-        public void setColor(Color c) {
-
-        }
-
-        @Override
-        public void setPaintMode() {
-
-        }
-
-        @Override
-        public void setXORMode(Color c1) {
-
-        }
-
-        @Override
-        public Font getFont() {
-            return null;
-        }
-
-        @Override
-        public void setFont(Font font) {
-
-        }
-
-        @Override
-        public FontMetrics getFontMetrics(Font f) {
-            return null;
-        }
-
-        @Override
-        public Rectangle getClipBounds() {
-            return null;
-        }
-
-        @Override
-        public void clipRect(int x, int y, int width, int height) {
-
-        }
-
-        @Override
-        public void setClip(int x, int y, int width, int height) {
-
-        }
-
-        @Override
-        public Shape getClip() {
-            return null;
-        }
-
-        @Override
-        public void setClip(Shape clip) {
-
-        }
-
-        @Override
-        public void copyArea(int x, int y, int width, int height, int dx, int dy) {
-
-        }
-
-        @Override
-        public void drawLine(int x1, int y1, int x2, int y2) {
-
-        }
-
-        @Override
-        public void fillRect(int x, int y, int width, int height) {
-
-        }
-
-        @Override
-        public void clearRect(int x, int y, int width, int height) {
-
-        }
-
-        @Override
-        public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-
-        }
-
-        @Override
-        public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-
-        }
-
-        @Override
-        public void drawOval(int x, int y, int width, int height) {
-
-        }
-
-        @Override
-        public void fillOval(int x, int y, int width, int height) {
-
-        }
-
-        @Override
-        public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-
-        }
-
-        @Override
-        public void fillArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-
-        }
-
-        @Override
-        public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
-
-        }
-
-        @Override
-        public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-
-        }
-
-        @Override
-        public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-
-        }
-
-        @Override
-        public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
-            return false;
-        }
-
-        @Override
-        public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
-            return false;
-        }
-
-        @Override
-        public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
-            return false;
-        }
-
-        @Override
-        public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
-            return false;
-        }
-
-        @Override
-        public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, ImageObserver observer) {
-            return false;
-        }
-
-        @Override
-        public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer) {
-            return false;
-        }
-
-        @Override
-        public void dispose() {
-
-        }
-    };
+    public void setModel(Square[][] model) {
+        this.model = model;
+    }
 }
