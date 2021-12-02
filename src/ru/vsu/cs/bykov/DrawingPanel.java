@@ -18,7 +18,6 @@ public class DrawingPanel extends JPanel implements MouseListener {
     private boolean isChosen = false;
     private final Board b1;
     private Square[][] model;
-    // todo унификация moves
     private int storedCol = -1;
     private int storedRow = -1;
 
@@ -133,10 +132,21 @@ public class DrawingPanel extends JPanel implements MouseListener {
                 repaint();
                 return;
             }
-            b1.moveInitializationWindow(col, row, storedCol, storedRow);
+
+            moveInitializationWindow(col, row, storedCol, storedRow);
             model = b1.getBoard();
             restoreBoard();
             repaint();
+        }
+    }
+    void moveInitializationWindow(int col, int row, int storedCol,
+                                  int storedRow) {
+        String peak = String.valueOf(Character.toChars(storedCol + 65)).concat(String.valueOf((storedRow + 1)));
+        String hit = String.valueOf(Character.toChars(col + 65)).concat(String.valueOf((row + 1)));
+        if ((b1.getMoves() % 2 == 0)) {
+            b1.move(peak, hit, Color.WHITE);
+        } else {
+            b1.move( peak, hit, Color.BLACK);
         }
     }
 

@@ -8,11 +8,11 @@ import java.awt.*;
 public class CheckersFrame extends JFrame {
 
 
-    public void createFrame(String text, String player2Text) {
-        Board board = new Board(text, player2Text);
+    public void createFrame(String playerOne, String playerTwo) {
+        Board board = new Board(playerOne, playerTwo);
         board.createBoard();
 
-        final DrawingPanel panel = new DrawingPanel(text, player2Text);
+        final DrawingPanel panel = new DrawingPanel(playerOne, playerTwo);
 
         panel.setModel(board.getBoard());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

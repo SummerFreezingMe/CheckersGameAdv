@@ -7,11 +7,15 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 public class Board {
     private final Square[][] board;
     static final int BOARD_SIZE = 8;
+Console cns = new Console();
+
+    public void setWindow(boolean window) {
+        isWindow = window;
+    }
 
     private boolean isWindow = true;
     private final GameLog log = new GameLog();
@@ -76,31 +80,7 @@ public class Board {
         }
     }
 
-    protected boolean moveInitializationConsole() {
-        if (moves == 0) {
-            isWindow = false;
-        }
-        messenger(GameStatus.CHOOSE_SQUARE);
-        Scanner sc = new Scanner(System.in);
-        String peak = sc.nextLine();
-        peak = peak.toUpperCase();
-        messenger(GameStatus.CHOOSE_MOVE);
-        String hit = sc.nextLine();
-        hit = hit.toUpperCase();
-        return (moves % 2 == 0) ? move(peak, hit, Color.WHITE) : move(peak, hit, Color.BLACK);
 
-    }
-
-    void moveInitializationWindow(int col, int row, int storedCol,
-                                  int storedRow) {
-        String peak = String.valueOf(Character.toChars(storedCol + 65)).concat(String.valueOf((storedRow + 1)));
-        String hit = String.valueOf(Character.toChars(col + 65)).concat(String.valueOf((row + 1)));
-        if ((moves % 2 == 0)) {
-            move(peak, hit, Color.WHITE);
-        } else {
-            move( peak, hit, Color.BLACK);
-        }
-    }
 
 
     private void streakCheck(String peak, Color clr) throws ArrayIndexOutOfBoundsException {
@@ -164,7 +144,7 @@ public class Board {
                 if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus() != null) {
                     if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus().getTeam() == color) {
                         messenger(GameStatus.MOVE_UNAVAILABLE);
-                        moveInitializationConsole();
+                        cns.moveInitializationConsole();
                         break;
                     } else if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus().getTeam() == enemy) {
                         Pawn fall = board[yPeak + i * yDirection][xPeak + i * xDirection].getStatus();
@@ -183,11 +163,11 @@ public class Board {
             streakCheck(hit, color);
         } else {
             messenger(GameStatus.SQUARE_UNAVAILABLE);
-            moveInitializationConsole();
+            cns.moveInitializationConsole();
         }
     }
 
-    private boolean move( String peak, String hit, Color clr) {
+    public boolean move(String peak, String hit, Color clr) {
         int xPeak = peak.charAt(0) - 65;
         int yPeak = Character.getNumericValue(peak.charAt(1) - 1);
         int xHit = hit.charAt(0) - 65;
@@ -216,9 +196,10 @@ public class Board {
                     } else {
                         messenger(GameStatus.MOVE_UNAVAILABLE);
                         if (!isWindow) {
-                            moveInitializationConsole();
+                            cns. moveInitializationConsole();
                         } else {
                             return false;
+                            // todo унификация
                         }
                     }
                 } else if (yHit - yPeak == 1 - 2 * colorPick && Math.abs(moveLength) == 1) {
@@ -228,7 +209,7 @@ public class Board {
                     } else {
                         messenger(GameStatus.MOVE_UNAVAILABLE);
                         if (!isWindow) {
-                            moveInitializationConsole();
+                            cns. moveInitializationConsole();
                         } else {
                             return false;
                         }
@@ -236,7 +217,7 @@ public class Board {
                 } else {
                     messenger(GameStatus.MOVE_UNAVAILABLE);
                     if (!isWindow) {
-                        moveInitializationConsole();
+                        cns. moveInitializationConsole();
                     } else {
                         return false;
                     }
@@ -249,7 +230,7 @@ public class Board {
         } else {
             messenger(GameStatus.SQUARE_UNAVAILABLE);
             if (!isWindow) {
-                moveInitializationConsole();
+                cns. moveInitializationConsole();
             } else {
                 return false;
             }
@@ -263,7 +244,7 @@ public class Board {
         return teamWhite.isEmpty();
     }
 
-    protected void messenger(final GameStatus n) {
+    void messenger(final GameStatus n) {
         String name = (moves % 2 == 0) ? firstPlayerName : secondPlayerName;
         int msg = n.ordinal();
         switch (msg) {

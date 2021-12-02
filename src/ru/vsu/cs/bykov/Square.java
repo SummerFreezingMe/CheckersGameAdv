@@ -9,10 +9,10 @@ public class Square {
     private final int xAxis;
 
 
-    public Square(char YAxis,int XAxis) {
+    public Square(char YAxis, int XAxis) {
         this.yAxis = YAxis;
         this.xAxis = XAxis;
-        setClr(chooseColor(YAxis,XAxis));
+        setClr(chooseColor(YAxis, XAxis));
 
     }
 
@@ -40,9 +40,10 @@ public class Square {
     public void setClr(Color clr) {
         this.clr = clr;
     }
-    public Color chooseColor(char y, int x){
-        if((y+x)%2==0){
+
+    public Color chooseColor(char y, int x) {
+        if ((y + x) % 2 == 0) {
             return Color.BLACK;
-        }else return Color.WHITE;
+        } else return Color.WHITE;
     }
 }
