@@ -1,1 +1,3 @@
-Move №1 by 1: C3 to B4
+Move №1 by : E3 to D4
+Move №2 by : F6 to E5
+Move №3 by : D4 to F6

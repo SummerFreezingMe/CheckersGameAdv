@@ -9,17 +9,45 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 
 public class DrawingPanel extends JPanel implements MouseListener {
     private final int MAX_WIDTH = 830;
     private final int MAX_HEIGHT = 600;
     private final int SQUARE_SIZE = 60;
-    private boolean isChosen = false;
-    private final Board b1;
+    private String peak;
+    private String hit;
+    private Board b1;
     private Square[][] model;
     private int storedCol = -1;
     private int storedRow = -1;
+    private boolean endgame = false;
+    private boolean isChosen = false;
+    private final AvailableMoves am = new AvailableMoves();
+
+    public Board getBoard() {
+        return b1;
+    }
+
+    public String getHit() {
+        return hit;
+    }
+
+    public String getPeak() {
+        return peak;
+    }
+
+    public void setPeak(String peak) {
+        this.peak = peak;
+    }
+
+    public void setHit(String hit) {
+        this.hit = hit;
+    }
+
+    public void setBoard(Board b1) {
+        this.b1 = b1;
+    }
+
 
     public DrawingPanel(String playerOne, String playerTwo) {
         b1 = new Board(playerOne, playerTwo);
@@ -60,11 +88,18 @@ public class DrawingPanel extends JPanel implements MouseListener {
         g2d.drawRect(SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE * 8, SQUARE_SIZE * 8);
         for (int i = 0; i < Board.BOARD_SIZE; i++) {
             for (int j = 0; j < Board.BOARD_SIZE; j++) {
-
-                paintSquare(g2d, model[i][j], model[i][j].getClr());
+                if (am.getMoves().contains(model[i][j])) {
+                    paintSquare(g2d, model[i][j], Color.GREEN);
+                }else  if (am.getKills().contains(model[i][j])) {
+                    paintSquare(g2d, model[i][j], Color.PINK);
+                }
+                else {
+                    paintSquare(g2d, model[i][j], model[i][j].getClr());
+                }
                 if (model[i][j].getStatus() != null) {
                     paintPawn(g2d, model[i][j]);
                 }
+
             }
         }
         if (b1.getTeamWhite().isEmpty()) {
@@ -78,7 +113,7 @@ public class DrawingPanel extends JPanel implements MouseListener {
     public void currentPlayer(Graphics2D g2d) {
         Font font = new Font("Arial", Font.PLAIN, 18);
         g2d.setFont(font);
-        String currPlayer = (b1.getMoves() % 2 == 0) ? b1.getFirstPlayerName() : b1.getSecondPlayerName();
+        String currPlayer = (currColor == Color.WHITE) ? b1.getFirstPlayerName() : b1.getSecondPlayerName();
         g2d.drawString("Player's move: " + currPlayer, 640, 100);
     }
 
@@ -115,6 +150,8 @@ public class DrawingPanel extends JPanel implements MouseListener {
         }
     }
 
+    Color currColor;
+
     @Override
     public void mouseClicked(MouseEvent e) {
         int col = (e.getX() - 65) / 60;
@@ -122,32 +159,32 @@ public class DrawingPanel extends JPanel implements MouseListener {
 
         if (!isChosen) {
             isChosen = true;
-            displayAvailableMoves(row, col, model[row][col].getStatus().getTeam());
+            currColor = model[row][col].getStatus().getTeam();
+            am.displayAvailableMoves(row, col, currColor, model);
             storedCol = col;
             storedRow = row;
         } else {
             isChosen = false;
             if (col == storedCol && storedRow == row) {
-                restoreBoard();
+                am.flush();
                 repaint();
                 return;
             }
 
-            moveInitializationWindow(col, row, storedCol, storedRow);
+            moveInitializationWindow(col, row, storedCol, storedRow, currColor);
             model = b1.getBoard();
-            restoreBoard();
-            repaint();
+            am.flush();
+
+
         }
+        repaint();
     }
+
     void moveInitializationWindow(int col, int row, int storedCol,
-                                  int storedRow) {
-        String peak = String.valueOf(Character.toChars(storedCol + 65)).concat(String.valueOf((storedRow + 1)));
-        String hit = String.valueOf(Character.toChars(col + 65)).concat(String.valueOf((row + 1)));
-        if ((b1.getMoves() % 2 == 0)) {
-            b1.move(peak, hit, Color.WHITE);
-        } else {
-            b1.move( peak, hit, Color.BLACK);
-        }
+                                  int storedRow, Color currColor) {
+        peak = String.valueOf(Character.toChars(storedCol + 65)).concat(String.valueOf((storedRow + 1)));
+        hit = String.valueOf(Character.toChars(col + 65)).concat(String.valueOf((row + 1)));
+        b1.move(peak, hit, currColor);
     }
 
     private void gameOver(Graphics2D g2d, String winner) {
@@ -157,98 +194,35 @@ public class DrawingPanel extends JPanel implements MouseListener {
         g2d.fillRect(640, 80, 150, 25);
         g2d.setColor(Color.BLACK);
         g2d.drawString("Победил игрок " + winner, 640, 100);
-    }
-
-    private void displayAvailableMoves(int row, int col, Color team) {
-        int direction = (team == Color.BLACK) ? -1 : 1;
-        Color rival = new Color(Math.abs(team.getRed() - 255), Math.abs(team.getRed() - 255), Math.abs(team.getRed() - 255));
-        if (model[row][col].getStatus().isQueen()) {
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    if (Math.abs(i - row) == Math.abs(j - col)) {
-                        if (model[i][j].getStatus() == null) {
-                            model[i][j].setClr(Color.GREEN);
-                        }
-                    }
-                }
-            }
-        } else {
-            if (col == 0) {
-                if (model[row + direction][col + 1].getStatus() == null) {
-                    model[row + direction][col + 1].setClr(Color.GREEN);
-                }
-
-
-            } else if (col == 7) {
-                if (model[row + direction][col - 1].getStatus() == null) {
-                    model[row + direction][col - 1].setClr(Color.GREEN);
-                }
-            } else {
-                if (model[row + direction][col + 1].getStatus() == null) {
-                    model[row + direction][col + 1].setClr(Color.GREEN);
-                }
-                if (model[row + direction][col - 1].getStatus() == null) {
-                    model[row + direction][col - 1].setClr(Color.GREEN);
-                }
-
-
-            }
-            if (row < 6 && col < 6) {
-                if (model[row + 1][col + 1].getStatus() != null) {
-                    if (Objects.equals(model[row + 1][col + 1].getStatus().getTeam(), rival) &&
-                            model[row + 2][col + 2].getStatus() == null) {
-                        model[row + 2][col + 2].setClr(Color.PINK);
-                    }
-                }
-            }
-            if (row < 6 && col > 1) {
-                if (model[row + 1][col - 1].getStatus() != null) {
-                    if (Objects.equals(model[row + 1][col - 1].getStatus().getTeam(), rival) &&
-                            model[row + 2][col - 2].getStatus() == null) {
-                        model[row + 2][col - 2].setClr(Color.PINK);
-                    }
-                }
-            }
-            if (row > 1 && col < 6) {
-                if (model[row - 1][col + 1].getStatus() != null) {
-                    if (Objects.equals(model[row - 1][col + 1].getStatus().getTeam(), rival) &&
-                            model[row - 2][col + 2].getStatus() == null) {
-                        model[row - 2][col + 2].setClr(Color.PINK);
-                    }
-                }
-            }
-            if (row > 1 && col > 1) {
-                if (model[row - 1][col - 1].getStatus() != null) {
-                    if (Objects.equals(model[row - 1][col - 1].getStatus().getTeam(), rival) && model[row - 2][col - 2].getStatus() == null) {
-                        model[row - 2][col - 2].setClr(Color.PINK);
-                    }
-                }
-            }
-        }
-        repaint();
+        endgame = false;
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
     }
 
     public void setModel(Square[][] model) {
         this.model = model;
     }
+
+    public boolean isEndgame() {
+        return endgame;
+    }
+
+    public void setEndgame(boolean endgame) {
+        this.endgame = endgame;
+    }
+
 }

@@ -2,8 +2,10 @@ package ru.vsu.cs.bykov;
 
 
 import ru.vsu.cs.bykov.utils.GameStatus;
-
+import ru.vsu.cs.bykov.utils.Reader;
 import java.awt.*;
+import java.io.*;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,35 +13,35 @@ import java.util.Objects;
 public class Board {
     private final Square[][] board;
     static final int BOARD_SIZE = 8;
-Console cns = new Console();
-
-    public void setWindow(boolean window) {
-        isWindow = window;
-    }
-
-    private boolean isWindow = true;
+    private final Console cns = new Console();
     private final GameLog log = new GameLog();
     private final String firstPlayerName;
     private final String secondPlayerName;
     private int moves = 0;
     private final List<Pawn> teamWhite = new ArrayList<>();
     private final List<Pawn> teamBlack = new ArrayList<>();
+    private final AvailableMoves am = new AvailableMoves();
 
     public List<Pawn> getTeamWhite() {
         return teamWhite;
     }
+
     public List<Pawn> getTeamBlack() {
         return teamBlack;
     }
+
     public String getFirstPlayerName() {
         return firstPlayerName;
     }
+
     public String getSecondPlayerName() {
         return secondPlayerName;
     }
+
     public int getMoves() {
         return moves;
     }
+
     public Square[][] getBoard() {
         return board;
     }
@@ -48,6 +50,7 @@ Console cns = new Console();
         board = new Square[BOARD_SIZE][BOARD_SIZE];
         this.firstPlayerName = firstPlayerName;
         this.secondPlayerName = secondPlayerName;
+        createBoard();
     }
 
     public void createBoard() {
@@ -81,8 +84,6 @@ Console cns = new Console();
     }
 
 
-
-
     private void streakCheck(String peak, Color clr) throws ArrayIndexOutOfBoundsException {
         Color enemy = (clr.getBlue() == 255) ? Color.BLACK : Color.WHITE;
         char xAxis = (char) (peak.charAt(0) - 65);
@@ -113,7 +114,7 @@ Console cns = new Console();
                 if (board[yAxis - 1][xAxis + 1].getStatus().getTeam() == enemy &&
                         board[yAxis - 2][xAxis + 2].getStatus() == null) {
                     String newHit = String.valueOf(Character.toChars(xAxis + 65 + 2)).concat(String.valueOf((yAxis - 1)));
-                    move( peak, newHit, clr);
+                    move(peak, newHit, clr);
                     return;
                 }
             }
@@ -123,7 +124,7 @@ Console cns = new Console();
                 if (board[(peak.charAt(1)) - 49 - 1][(peak.charAt(0) - 65 - 1)].getStatus().getTeam() == enemy &&
                         board[yAxis - 2][xAxis - 2].getStatus() == null) {
                     String newHit = String.valueOf(Character.toChars(xAxis + 65 - 2)).concat(String.valueOf((yAxis - 1)));
-                    move( peak, newHit, clr);
+                    move(peak, newHit, clr);
                 }
             }
         }
@@ -173,7 +174,7 @@ Console cns = new Console();
         int xHit = hit.charAt(0) - 65;
         int yHit = Character.getNumericValue(hit.charAt(1) - 1);
         int colorPick = moves % 2;
-        if (board[yPeak][xPeak].getStatus().getTeam() == clr) {
+        if (Objects.equals(board[yPeak][xPeak].getStatus().getTeam(), clr)) {
             Pawn curr = board[yPeak][xPeak].getStatus();
             int moveLength = peak.charAt(0) - hit.charAt(0);
             if (curr.isQueen()) {
@@ -195,12 +196,7 @@ Console cns = new Console();
                         streakCheck(hit, clr);
                     } else {
                         messenger(GameStatus.MOVE_UNAVAILABLE);
-                        if (!isWindow) {
-                            cns. moveInitializationConsole();
-                        } else {
-                            return false;
-                            // todo унификация
-                        }
+                        return false;
                     }
                 } else if (yHit - yPeak == 1 - 2 * colorPick && Math.abs(moveLength) == 1) {
                     if (board[yHit][xHit].getStatus() == null) {
@@ -208,19 +204,11 @@ Console cns = new Console();
                         board[yPeak][xPeak].setStatus(null);
                     } else {
                         messenger(GameStatus.MOVE_UNAVAILABLE);
-                        if (!isWindow) {
-                            cns. moveInitializationConsole();
-                        } else {
-                            return false;
-                        }
+                        return false;
                     }
                 } else {
                     messenger(GameStatus.MOVE_UNAVAILABLE);
-                    if (!isWindow) {
-                        cns. moveInitializationConsole();
-                    } else {
-                        return false;
-                    }
+                    return false;
                 }
                 if (yHit == 7 - colorPick * 7) {
                     board[yHit][xHit].getStatus().setQueen(true);
@@ -229,13 +217,10 @@ Console cns = new Console();
             }
         } else {
             messenger(GameStatus.SQUARE_UNAVAILABLE);
-            if (!isWindow) {
-                cns. moveInitializationConsole();
-            } else {
-                return false;
-            }
+            return false;
+
         }
-        if ((moves % 2 == 0)) {
+        if ((clr==Color.WHITE)) {
             log.writeMove(moves, hit, peak, firstPlayerName);
         } else {
             log.writeMove(moves, hit, peak, secondPlayerName);
@@ -256,5 +241,33 @@ Console cns = new Console();
             default -> throw new IllegalStateException("Unexpected value: " + n);
         }
 
+    }
+
+    public void serverMove(Socket socket) {
+        try {
+
+            String currMove = botMoves.get(moves / 2);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            String input = in.readLine();
+            String[] parsed = input.split(" ");
+            String[] curr = currMove.split(" ");
+                move(parsed[0], parsed[1], Color.WHITE);
+                move(curr[0], curr[1], Color.BLACK);
+            System.out.println(currMove);
+            out.println(currMove);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Cannot connect to client", ex);
+        }
+
+
+    }List<String> botMoves;
+
+    {
+        try {
+            botMoves = Reader.getStrategy(new File("bot.txt"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

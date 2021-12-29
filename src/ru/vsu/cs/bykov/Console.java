@@ -8,9 +8,15 @@ import java.util.Scanner;
 import static ru.vsu.cs.bykov.utils.GameStatus.END_GAME;
 
 public class Console {
+    public  static void main(String[] args) {
+          Console consoleGame = new Console();
+         consoleGame.startGame();
+        }
 
     Scanner sc = new Scanner(System.in);
     Board board;
+
+
     public void startGame() {
         System.out.println("Enter first player name: ");
         String firstPlayerName=sc.nextLine();
@@ -54,9 +60,6 @@ public class Console {
     }
 
     protected boolean moveInitializationConsole() {
-        if (board.getMoves() == 0) {
-            board.setWindow(false);
-        }
         board.messenger(GameStatus.CHOOSE_SQUARE);
         Scanner sc = new Scanner(System.in);
         String peak = sc.nextLine();
@@ -64,7 +67,9 @@ public class Console {
         board.messenger(GameStatus.CHOOSE_MOVE);
         String hit = sc.nextLine();
         hit = hit.toUpperCase();
-        return (board.getMoves() % 2 == 0) ? board.move(peak, hit, Color.WHITE) : board.move(peak, hit, Color.BLACK);
+        Color currColor=board.getBoard()[Character.getNumericValue(peak.charAt(1) - 1)]
+                [peak.charAt(0) - 65].getStatus().getTeam();
+        return board.move(peak, hit, currColor);
 
     }
 }

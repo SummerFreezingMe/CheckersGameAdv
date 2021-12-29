@@ -1,40 +1,34 @@
 package ru.vsu.cs.bykov;
 
+import ru.vsu.cs.bykov.server.AppClient;
 import ru.vsu.cs.bykov.utils.TextPrompt;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class CheckersFrame extends JFrame {
+    DrawingPanel drawPanel;
 
+    public static void main(String[] args) {
+        CheckersFrame checkersFrame = new CheckersFrame();
+        checkersFrame.createPad();
+    }
 
-    public void createFrame(String playerOne, String playerTwo) {
+    public void createFrame(String playerOne, String playerTwo, boolean b) {
         Board board = new Board(playerOne, playerTwo);
-        board.createBoard();
-
-        final DrawingPanel panel = new DrawingPanel(playerOne, playerTwo);
-
-        panel.setModel(board.getBoard());
+        drawPanel = new DrawingPanel(playerOne, playerTwo);
+        drawPanel.setModel(board.getBoard());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Шашки");
         setSize(850, 640);
 
-
-        JLabel tf1 = new JLabel();
-        tf1.setLocation(800, 150);
-        Dimension labelSize = new Dimension(80, 80);
-        tf1.setPreferredSize(labelSize);
-        tf1.setBackground(Color.BLACK);
-        tf1.setText("Я хочу пиццы");
-        panel.add(tf1);
-
-        add(panel);
-
+        add(drawPanel);
         setLayout(new BorderLayout());
-        add(tf1);
-        addMouseListener(panel);
+        addMouseListener(drawPanel);
         setLocationRelativeTo(null);
         setVisible(true);
+
     }
 
     public void createPad() {
@@ -44,11 +38,35 @@ public class CheckersFrame extends JFrame {
         TextPrompt tp2 = new TextPrompt("Second Player Name...", player2);
         player1.setOpaque(false);
         JButton button = new JButton("Start Game");
-
-
+        JButton mp = new JButton("Multiplayer");
         JPanel panel = new JPanel(new FlowLayout());
         panel.add(player1);
         panel.add(player2);
+        panel.add(button);
+        panel.add(mp);
+        JFrame frame = new JFrame("Game Launcher");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(panel);
+        frame.pack();
+        frame.setSize(200, 155);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        button.addActionListener(ae -> {
+            createFrame(player1.getText(), player2.getText(), false);
+            frame.dispose();
+        });
+        mp.addActionListener(ae -> {
+            serverLauncher();
+            frame.dispose();
+        });
+    }
+
+    public void serverLauncher() {
+        JTextField player = new JTextField(15);
+        TextPrompt tp1 = new TextPrompt("Player Name...", player);
+        JButton button = new JButton("Connect");
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(player);
         panel.add(button);
         JFrame frame = new JFrame("Game Launcher");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -58,7 +76,13 @@ public class CheckersFrame extends JFrame {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         button.addActionListener(ae -> {
-            createFrame(player1.getText(), player2.getText());
+            createFrame(player.getText(), "Bot", true);
+            AppClient client = new AppClient("localhost", 9989, drawPanel);
+            try {
+                client.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             frame.dispose();
         });
     }
