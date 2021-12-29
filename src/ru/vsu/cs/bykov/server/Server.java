@@ -4,20 +4,20 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class AppServer {
+public class Server {
     private final ServerSocket serverSocket1;
 
 
     public static void main(String[] args) {
         try {
             int port = Integer.parseInt(args[0]);
-            AppServer server = new AppServer(port);
+            Server server = new Server(port);
             server.start();
         } catch (IOException e) {
             throw new IllegalStateException("Cannot start the server", e);
         }
     }
-    public AppServer(int port) throws IOException {
+    public Server(int port) throws IOException {
         serverSocket1 = new ServerSocket(port,2);
     }
 

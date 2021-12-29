@@ -2,17 +2,15 @@ package ru.vsu.cs.bykov;
 
 
 import ru.vsu.cs.bykov.utils.GameStatus;
-import ru.vsu.cs.bykov.utils.Reader;
+
 import java.awt.*;
-import java.io.*;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Board {
     private final Square[][] board;
-    static final int BOARD_SIZE = 8;
+    public static final int BOARD_SIZE = 8;
     private final Console cns = new Console();
     private final GameLog log = new GameLog();
     private final String firstPlayerName;
@@ -174,31 +172,28 @@ public class Board {
         int xHit = hit.charAt(0) - 65;
         int yHit = Character.getNumericValue(hit.charAt(1) - 1);
         int colorPick = moves % 2;
+
         if (Objects.equals(board[yPeak][xPeak].getStatus().getTeam(), clr)) {
             Pawn curr = board[yPeak][xPeak].getStatus();
+            am.displayAvailableMoves(yPeak, xPeak, clr, board);
             int moveLength = peak.charAt(0) - hit.charAt(0);
             if (curr.isQueen()) {
                 queenMove(clr, peak, hit, moveLength);
             } else {
-                if (Math.abs(yHit - yPeak) == 2 && Math.abs(moveLength) == 2) {//case:
-                    if (Objects.equals((board[(yHit + yPeak) / 2][(xHit + xPeak) / 2]).getStatus().getTeam(),
-                            new Color(colorPick * 255, colorPick * 255, colorPick * 255))) {
-                        Pawn fall = board[(yHit + yPeak) / 2][(xHit + xPeak) / 2].getStatus();
-                        if ((clr == Color.BLACK)) {
-                            teamWhite.remove(fall);
-                        } else {
-                            teamBlack.remove(fall);
-                        }
-                        fall.deletePawn();
-                        board[(yHit + yPeak) / 2][(xHit + xPeak) / 2].setStatus(null);
-                        board[yHit][xHit].setStatus(curr);
-                        board[yPeak][xPeak].setStatus(null);
-                        streakCheck(hit, clr);
+                if (am.getKills().contains(board[yHit][xHit])) {//case:
+                    Pawn fall = board[(yHit + yPeak) / 2][(xHit + xPeak) / 2].getStatus();
+                    if ((clr == Color.BLACK)) {
+                        teamWhite.remove(fall);
                     } else {
-                        messenger(GameStatus.MOVE_UNAVAILABLE);
-                        return false;
+                        teamBlack.remove(fall);
                     }
-                } else if (yHit - yPeak == 1 - 2 * colorPick && Math.abs(moveLength) == 1) {
+                    fall.deletePawn();
+                    board[(yHit + yPeak) / 2][(xHit + xPeak) / 2].setStatus(null);
+                    board[yHit][xHit].setStatus(curr);
+                    board[yPeak][xPeak].setStatus(null);
+                    streakCheck(hit, clr);
+
+                } else if (am.getMoves().contains(board[yHit][xHit])) {
                     if (board[yHit][xHit].getStatus() == null) {
                         board[yHit][xHit].setStatus(curr);
                         board[yPeak][xPeak].setStatus(null);
@@ -220,7 +215,7 @@ public class Board {
             return false;
 
         }
-        if ((clr==Color.WHITE)) {
+        if ((clr == Color.WHITE)) {
             log.writeMove(moves, hit, peak, firstPlayerName);
         } else {
             log.writeMove(moves, hit, peak, secondPlayerName);
@@ -243,31 +238,4 @@ public class Board {
 
     }
 
-    public void serverMove(Socket socket) {
-        try {
-
-            String currMove = botMoves.get(moves / 2);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            String input = in.readLine();
-            String[] parsed = input.split(" ");
-            String[] curr = currMove.split(" ");
-                move(parsed[0], parsed[1], Color.WHITE);
-                move(curr[0], curr[1], Color.BLACK);
-            System.out.println(currMove);
-            out.println(currMove);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Cannot connect to client", ex);
-        }
-
-
-    }List<String> botMoves;
-
-    {
-        try {
-            botMoves = Reader.getStrategy(new File("bot.txt"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
 }

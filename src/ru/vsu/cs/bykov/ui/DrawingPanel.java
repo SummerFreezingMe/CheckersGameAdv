@@ -1,4 +1,8 @@
-package ru.vsu.cs.bykov;
+package ru.vsu.cs.bykov.ui;
+
+import ru.vsu.cs.bykov.AvailableMoves;
+import ru.vsu.cs.bykov.Board;
+import ru.vsu.cs.bykov.Square;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -115,15 +119,6 @@ public class DrawingPanel extends JPanel implements MouseListener {
         g2d.setFont(font);
         String currPlayer = (currColor == Color.WHITE) ? b1.getFirstPlayerName() : b1.getSecondPlayerName();
         g2d.drawString("Player's move: " + currPlayer, 640, 100);
-    }
-
-    public void restoreBoard() {
-        for (int i = 0; i < Board.BOARD_SIZE; i++) {
-            for (int j = 0; j < Board.BOARD_SIZE; j++) {
-                if ((i + j) % 2 == 0)
-                    model[i][j].setClr(Color.BLACK);
-            }
-        }
     }
 
     public void paintSquare(Graphics g, Square sqr, Color clr) {

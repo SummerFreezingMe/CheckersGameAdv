@@ -1,6 +1,7 @@
-package ru.vsu.cs.bykov;
+package ru.vsu.cs.bykov.ui;
 
-import ru.vsu.cs.bykov.server.AppClient;
+import ru.vsu.cs.bykov.Board;
+import ru.vsu.cs.bykov.server.Client;
 import ru.vsu.cs.bykov.utils.TextPrompt;
 
 import javax.swing.*;
@@ -8,7 +9,7 @@ import java.awt.*;
 import java.io.IOException;
 
 public class CheckersFrame extends JFrame {
-    DrawingPanel drawPanel;
+    private DrawingPanel drawPanel;
 
     public static void main(String[] args) {
         CheckersFrame checkersFrame = new CheckersFrame();
@@ -77,7 +78,7 @@ public class CheckersFrame extends JFrame {
         frame.setVisible(true);
         button.addActionListener(ae -> {
             createFrame(player.getText(), "Bot", true);
-            AppClient client = new AppClient("localhost", 9989, drawPanel);
+            Client client = new Client("localhost", 9989, drawPanel);
             try {
                 client.start();
             } catch (IOException e) {
