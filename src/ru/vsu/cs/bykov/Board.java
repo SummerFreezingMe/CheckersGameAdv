@@ -52,9 +52,9 @@ public class Board {
     }
 
     public void createBoard() {
-        for (int i = 1; i < BOARD_SIZE + 1; i++) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
             for (char j = 'A'; j < 'I'; j++) {
-                board[i - 1][j - 65] = new Square(j, i);
+                board[i][j - 65] = new Square(j, i);
             }
         }
         serveBoard();
@@ -82,17 +82,15 @@ public class Board {
     }
 
 
-    private void streakCheck(String peak, Color clr) throws ArrayIndexOutOfBoundsException {
+    private void streakCheck(char xAxis, int yAxis, Color clr) throws ArrayIndexOutOfBoundsException {
         Color enemy = (clr.getBlue() == 255) ? Color.BLACK : Color.WHITE;
-        char xAxis = (char) (peak.charAt(0) - 65);
-        int yAxis = Character.getNumericValue(peak.charAt(1) - 1);
         if (yAxis < BOARD_SIZE - 2 && xAxis < BOARD_SIZE - 2) {
             if (board[yAxis + 1][xAxis + 1].getStatus() != null) {
                 if (board[yAxis + 1][xAxis + 1].getStatus().getTeam() == enemy &&
                         board[yAxis + 2][xAxis + 2].getStatus() == null
                 ) {
                     String newHit = String.valueOf(Character.toChars(xAxis + 67)).concat(String.valueOf((yAxis + 3)));
-                    move(peak, newHit, clr);
+                    move(xAxis, newHit, clr);
                     return;
                 }
             }
@@ -102,7 +100,7 @@ public class Board {
                 if (board[yAxis + 1][(xAxis - 1)].getStatus().getTeam() == enemy &&
                         board[yAxis + 2][xAxis - 2].getStatus() == null) {
                     String newHit = String.valueOf(Character.toChars(xAxis + 63)).concat(String.valueOf((yAxis + 3)));
-                    move(peak, newHit, clr);
+                    move(xAxis, newHit, clr);
                     return;
                 }
             }
@@ -112,17 +110,17 @@ public class Board {
                 if (board[yAxis - 1][xAxis + 1].getStatus().getTeam() == enemy &&
                         board[yAxis - 2][xAxis + 2].getStatus() == null) {
                     String newHit = String.valueOf(Character.toChars(xAxis + 65 + 2)).concat(String.valueOf((yAxis - 1)));
-                    move(peak, newHit, clr);
+                    move(xAxis, newHit, clr);
                     return;
                 }
             }
         }
         if (yAxis > 1 && xAxis > 1) {
             if (board[yAxis - 1][xAxis - 1].getStatus() != null) {
-                if (board[(peak.charAt(1)) - 49 - 1][(peak.charAt(0) - 65 - 1)].getStatus().getTeam() == enemy &&
+                if (board[(xAxis.charAt(1)) - 49 - 1][(xAxis.charAt(0) - 65 - 1)].getStatus().getTeam() == enemy &&
                         board[yAxis - 2][xAxis - 2].getStatus() == null) {
                     String newHit = String.valueOf(Character.toChars(xAxis + 65 - 2)).concat(String.valueOf((yAxis - 1)));
-                    move(peak, newHit, clr);
+                    move(xAxis, newHit, clr);
                 }
             }
         }
@@ -159,7 +157,7 @@ public class Board {
             }
             board[yHit][xHit].setStatus(curr);
             board[yPeak][xPeak].setStatus(null);
-            streakCheck(hit, color);
+            streakCheck(hit, color, );
         } else {
             messenger(GameStatus.SQUARE_UNAVAILABLE);
             cns.moveInitializationConsole();
@@ -191,7 +189,7 @@ public class Board {
                     board[(yHit + yPeak) / 2][(xHit + xPeak) / 2].setStatus(null);
                     board[yHit][xHit].setStatus(curr);
                     board[yPeak][xPeak].setStatus(null);
-                    streakCheck(hit, clr);
+                    streakCheck(hit, clr, );
 
                 } else if (am.getMoves().contains(board[yHit][xHit])) {
                     if (board[yHit][xHit].getStatus() == null) {

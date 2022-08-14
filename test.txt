@@ -1,10 +1,6 @@
-Move №1 by h: C3 to D4
-Move №2 by bot: D6 to C5
-Move №3 by h: E3 to F4
-Move №4 by bot: C5 to B4
-Move №5 by h: G3 to H4
-Move №6 by bot: B6 to A5
-Move №7 by h: F2 to G3
-Move №8 by bot: H6 to G5
-Move №9 by h: D2 to E3
-Move №10 by bot: F6 to E5
+Move №1 by fh: E3 to F4
+Move №2 by jh: D6 to E5
+Move №3 by fh: F4 to D6
+Move №4 by jh: H6 to G5
+Move №5 by fh: C3 to D4
+Move №6 by jh: C5 to E3
