@@ -91,8 +91,7 @@ public class Board {
                 if (board[yAxis + 1][xAxis + 1].getStatus().getTeam() == enemy &&
                         board[yAxis + 2][xAxis + 2].getStatus() == null
                 ) {
-                    String newHit = String.valueOf(Character.toChars(xAxis + 67)).concat(String.valueOf((yAxis + 3)));
-                    move(peak, newHit, clr);
+                    moves--;
                     return;
                 }
             }
@@ -101,8 +100,7 @@ public class Board {
             if (board[yAxis + 1][xAxis - 1].getStatus() != null) {
                 if (board[yAxis + 1][(xAxis - 1)].getStatus().getTeam() == enemy &&
                         board[yAxis + 2][xAxis - 2].getStatus() == null) {
-                    String newHit = String.valueOf(Character.toChars(xAxis + 63)).concat(String.valueOf((yAxis + 3)));
-                    move(peak, newHit, clr);
+                    moves--;
                     return;
                 }
             }
@@ -111,8 +109,7 @@ public class Board {
             if (board[yAxis - 1][xAxis + 1].getStatus() != null) {
                 if (board[yAxis - 1][xAxis + 1].getStatus().getTeam() == enemy &&
                         board[yAxis - 2][xAxis + 2].getStatus() == null) {
-                    String newHit = String.valueOf(Character.toChars(xAxis + 65 + 2)).concat(String.valueOf((yAxis - 1)));
-                    move(peak, newHit, clr);
+                    moves--;
                     return;
                 }
             }
@@ -121,8 +118,7 @@ public class Board {
             if (board[yAxis - 1][xAxis - 1].getStatus() != null) {
                 if (board[(peak.charAt(1)) - 49 - 1][(peak.charAt(0) - 65 - 1)].getStatus().getTeam() == enemy &&
                         board[yAxis - 2][xAxis - 2].getStatus() == null) {
-                    String newHit = String.valueOf(Character.toChars(xAxis + 65 - 2)).concat(String.valueOf((yAxis - 1)));
-                    move(peak, newHit, clr);
+                    moves--;
                 }
             }
         }
@@ -173,7 +169,7 @@ public class Board {
         int yHit = Character.getNumericValue(hit.charAt(1) - 1);
         int colorPick = moves % 2;
 
-        if (Objects.equals(board[yPeak][xPeak].getStatus().getTeam(), clr)) {
+        if (moveValidation(clr, xPeak, yPeak)) {
             Pawn curr = board[yPeak][xPeak].getStatus();
             am.displayAvailableMoves(yPeak, xPeak, clr, board);
             int moveLength = peak.charAt(0) - hit.charAt(0);
@@ -222,6 +218,14 @@ public class Board {
         }
         this.moves++;
         return teamWhite.isEmpty();
+    }
+
+    private boolean moveValidation(Color clr, int xPeak, int yPeak) {
+        if (moves % 2 == 0 && clr == Color.WHITE || moves % 2 == 1 && clr == Color.BLACK) {
+            return Objects.equals(board[yPeak][xPeak].getStatus().getTeam(), clr);
+        }
+
+        return false;
     }
 
     void messenger(final GameStatus n) {

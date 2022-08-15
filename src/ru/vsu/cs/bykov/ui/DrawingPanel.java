@@ -117,30 +117,30 @@ public class DrawingPanel extends JPanel implements MouseListener {
     public void currentPlayer(Graphics2D g2d) {
         Font font = new Font("Arial", Font.PLAIN, 18);
         g2d.setFont(font);
-        String currPlayer = (currColor == Color.WHITE) ? b1.getFirstPlayerName() : b1.getSecondPlayerName();
+        String currPlayer = (currColor == Color.BLACK) ? b1.getSecondPlayerName() : b1.getFirstPlayerName();
         g2d.drawString("Player's move: " + currPlayer, 640, 100);
     }
 
     public void paintSquare(Graphics g, Square sqr, Color clr) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(clr);
-        g2d.drawRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
-        g2d.fillRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.drawRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.fillRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
     }
 
     public void paintPawn(Graphics g, Square sqr) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.BLACK);
-        g2d.drawOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE,  (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.drawOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE,  SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
         if (sqr.getStatus().getTeam() == Color.WHITE) {
             g2d.setColor(Color.WHITE);
         } else if (sqr.getStatus().getTeam() == Color.BLACK) {
             g2d.setColor(Color.RED);
         }
-        g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE,  (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE,  SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
         if (sqr.getStatus().isQueen()) {
             g2d.setColor(Color.BLACK);
-            g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE + SQUARE_SIZE / 3,  (model.length - sqr.getX()) * SQUARE_SIZE + SQUARE_SIZE / 3, SQUARE_SIZE / 3, SQUARE_SIZE / 3);
+            g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE + SQUARE_SIZE / 3,  SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE + SQUARE_SIZE / 3, SQUARE_SIZE / 3, SQUARE_SIZE / 3);
 
         }
     }
