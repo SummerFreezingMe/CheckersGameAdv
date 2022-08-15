@@ -82,15 +82,14 @@ public class Board {
     }
 
 
-    private void streakCheck(char xAxis, int yAxis, Color clr) throws ArrayIndexOutOfBoundsException {
+    private void streakCheck(int xAxis, int yAxis, Color clr) throws ArrayIndexOutOfBoundsException {
         Color enemy = (clr.getBlue() == 255) ? Color.BLACK : Color.WHITE;
         if (yAxis < BOARD_SIZE - 2 && xAxis < BOARD_SIZE - 2) {
             if (board[yAxis + 1][xAxis + 1].getStatus() != null) {
                 if (board[yAxis + 1][xAxis + 1].getStatus().getTeam() == enemy &&
                         board[yAxis + 2][xAxis + 2].getStatus() == null
                 ) {
-                    String newHit = String.valueOf(Character.toChars(xAxis + 67)).concat(String.valueOf((yAxis + 3)));
-                    move(xAxis, newHit, clr);
+                    moves--;
                     return;
                 }
             }
@@ -99,8 +98,7 @@ public class Board {
             if (board[yAxis + 1][xAxis - 1].getStatus() != null) {
                 if (board[yAxis + 1][(xAxis - 1)].getStatus().getTeam() == enemy &&
                         board[yAxis + 2][xAxis - 2].getStatus() == null) {
-                    String newHit = String.valueOf(Character.toChars(xAxis + 63)).concat(String.valueOf((yAxis + 3)));
-                    move(xAxis, newHit, clr);
+                    moves--;
                     return;
                 }
             }
@@ -109,18 +107,17 @@ public class Board {
             if (board[yAxis - 1][xAxis + 1].getStatus() != null) {
                 if (board[yAxis - 1][xAxis + 1].getStatus().getTeam() == enemy &&
                         board[yAxis - 2][xAxis + 2].getStatus() == null) {
-                    String newHit = String.valueOf(Character.toChars(xAxis + 65 + 2)).concat(String.valueOf((yAxis - 1)));
-                    move(xAxis, newHit, clr);
+                    moves--;
                     return;
                 }
             }
         }
         if (yAxis > 1 && xAxis > 1) {
             if (board[yAxis - 1][xAxis - 1].getStatus() != null) {
-                if (board[(xAxis.charAt(1)) - 49 - 1][(xAxis.charAt(0) - 65 - 1)].getStatus().getTeam() == enemy &&
+                if (board[yAxis - 1][xAxis - 1].getStatus().getTeam() == enemy &&
                         board[yAxis - 2][xAxis - 2].getStatus() == null) {
-                    String newHit = String.valueOf(Character.toChars(xAxis + 65 - 2)).concat(String.valueOf((yAxis - 1)));
-                    move(xAxis, newHit, clr);
+                    moves--;
+
                 }
             }
         }
@@ -157,7 +154,7 @@ public class Board {
             }
             board[yHit][xHit].setStatus(curr);
             board[yPeak][xPeak].setStatus(null);
-            streakCheck(hit, color, );
+            streakCheck(xHit, yHit, color);
         } else {
             messenger(GameStatus.SQUARE_UNAVAILABLE);
             cns.moveInitializationConsole();
@@ -171,7 +168,7 @@ public class Board {
         int yHit = Character.getNumericValue(hit.charAt(1) - 1);
         int colorPick = moves % 2;
 
-        if (Objects.equals(board[yPeak][xPeak].getStatus().getTeam(), clr)) {
+        if (moveValidation(clr, xPeak, yPeak)) {
             Pawn curr = board[yPeak][xPeak].getStatus();
             am.displayAvailableMoves(yPeak, xPeak, clr, board);
             int moveLength = peak.charAt(0) - hit.charAt(0);
@@ -189,7 +186,7 @@ public class Board {
                     board[(yHit + yPeak) / 2][(xHit + xPeak) / 2].setStatus(null);
                     board[yHit][xHit].setStatus(curr);
                     board[yPeak][xPeak].setStatus(null);
-                    streakCheck(hit, clr, );
+                    streakCheck(xHit, yHit, clr);
 
                 } else if (am.getMoves().contains(board[yHit][xHit])) {
                     if (board[yHit][xHit].getStatus() == null) {
@@ -220,6 +217,14 @@ public class Board {
         }
         this.moves++;
         return teamWhite.isEmpty();
+    }
+
+    private boolean moveValidation(Color clr, int xPeak, int yPeak) {
+        if (moves % 2 == 0 && clr == Color.WHITE || moves % 2 == 1 && clr == Color.BLACK) {
+            return Objects.equals(board[yPeak][xPeak].getStatus().getTeam(), clr);
+        }
+
+        return false;
     }
 
     void messenger(final GameStatus n) {
