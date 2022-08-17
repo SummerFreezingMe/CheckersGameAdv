@@ -1,7 +1,8 @@
-package ru.vsu.cs.bykov;
+package ru.vsu.cs.bykov.game;
 
 
 import ru.vsu.cs.bykov.utils.GameStatus;
+import ru.vsu.cs.bykov.utils.Messenger;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.Objects;
 public class Board {
     private final Square[][] board;
     public static final int BOARD_SIZE = 8;
-    private final Console cns = new Console();
     private final GameLog log = new GameLog();
     private final String firstPlayerName;
     private final String secondPlayerName;
@@ -19,6 +19,7 @@ public class Board {
     private final List<Pawn> teamWhite = new ArrayList<>();
     private final List<Pawn> teamBlack = new ArrayList<>();
     private final AvailableMoves am = new AvailableMoves();
+    private final Messenger msg;
 
     public List<Pawn> getTeamWhite() {
         return teamWhite;
@@ -48,6 +49,7 @@ public class Board {
         board = new Square[BOARD_SIZE][BOARD_SIZE];
         this.firstPlayerName = firstPlayerName;
         this.secondPlayerName = secondPlayerName;
+        msg = new Messenger(firstPlayerName,secondPlayerName);
         createBoard();
     }
 
@@ -123,7 +125,7 @@ public class Board {
         }
     }
 
-    private void queenMove(Color color, String peak, String hit, int moveLength) {
+    private boolean queenMove(Color color, String peak, String hit, int moveLength) {
         int xPeak = peak.charAt(0) - 65;
         int yPeak = Character.getNumericValue(peak.charAt(1) - 1);
         int xHit = hit.charAt(0) - 65;
@@ -137,9 +139,8 @@ public class Board {
             for (int i = 1; i <= Math.abs(moveLength); i++) {
                 if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus() != null) {
                     if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus().getTeam() == color) {
-                        messenger(GameStatus.MOVE_UNAVAILABLE);
-                        cns.moveInitializationConsole();
-                        break;
+                        msg.messenger(GameStatus.MOVE_UNAVAILABLE,moves);
+                        return false;
                     } else if (board[yPeak + i * yDirection][(xPeak + i * xDirection)].getStatus().getTeam() == enemy) {
                         Pawn fall = board[yPeak + i * yDirection][xPeak + i * xDirection].getStatus();
                         if ((enemy == Color.BLACK)) {
@@ -156,9 +157,10 @@ public class Board {
             board[yPeak][xPeak].setStatus(null);
             streakCheck(xHit, yHit, color);
         } else {
-            messenger(GameStatus.SQUARE_UNAVAILABLE);
-            cns.moveInitializationConsole();
+            msg.messenger(GameStatus.SQUARE_UNAVAILABLE,moves);
+            return false;
         }
+        return false;
     }
 
     public boolean move(String peak, String hit, Color clr) {
@@ -193,11 +195,11 @@ public class Board {
                         board[yHit][xHit].setStatus(curr);
                         board[yPeak][xPeak].setStatus(null);
                     } else {
-                        messenger(GameStatus.MOVE_UNAVAILABLE);
+                        msg.messenger(GameStatus.MOVE_UNAVAILABLE,moves);
                         return false;
                     }
                 } else {
-                    messenger(GameStatus.MOVE_UNAVAILABLE);
+                    msg.messenger(GameStatus.MOVE_UNAVAILABLE,moves);
                     return false;
                 }
                 if (yHit == 7 - colorPick * 7) {
@@ -206,7 +208,7 @@ public class Board {
                 log.writeOutput();
             }
         } else {
-            messenger(GameStatus.SQUARE_UNAVAILABLE);
+            msg.messenger(GameStatus.SQUARE_UNAVAILABLE,moves);
             return false;
 
         }
@@ -216,7 +218,15 @@ public class Board {
             log.writeMove(moves, hit, peak, secondPlayerName);
         }
         this.moves++;
-        return teamWhite.isEmpty();
+        return endgame();
+    }
+
+    private boolean endgame() {
+        if (getTeamBlack().isEmpty()||getTeamWhite().isEmpty()){
+            msg.messenger(GameStatus.END_GAME,moves);
+            return true;
+        }
+        return false;
     }
 
     private boolean moveValidation(Color clr, int xPeak, int yPeak) {
@@ -226,19 +236,4 @@ public class Board {
 
         return false;
     }
-
-    void messenger(final GameStatus n) {
-        String name = (moves % 2 == 0) ? firstPlayerName : secondPlayerName;
-        int msg = n.ordinal();
-        switch (msg) {
-            case (0) -> System.out.println(name + ", choose a square: ");
-            case (1) -> System.out.println(name + ", choose a move: ");
-            case (2) -> System.out.println(name + ", this move is not possible ");
-            case (3) -> System.out.println(name + ", this cell is not available ");
-            case (4) -> System.out.println(name + "The game is over for " + moves + " moves, the winner - " + name);
-            default -> throw new IllegalStateException("Unexpected value: " + n);
-        }
-
     }
-
-}

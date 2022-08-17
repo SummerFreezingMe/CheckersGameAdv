@@ -1,8 +1,8 @@
 package ru.vsu.cs.bykov.ui;
 
-import ru.vsu.cs.bykov.AvailableMoves;
-import ru.vsu.cs.bykov.Board;
-import ru.vsu.cs.bykov.Square;
+import ru.vsu.cs.bykov.game.AvailableMoves;
+import ru.vsu.cs.bykov.game.Board;
+import ru.vsu.cs.bykov.game.Square;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -124,23 +124,23 @@ public class DrawingPanel extends JPanel implements MouseListener {
     public void paintSquare(Graphics g, Square sqr, Color clr) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(clr);
-        g2d.drawRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
-        g2d.fillRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.drawRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.fillRect(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE, (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
     }
 
     public void paintPawn(Graphics g, Square sqr) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.BLACK);
-        g2d.drawOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE,  SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.drawOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE,  (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
         if (sqr.getStatus().getTeam() == Color.WHITE) {
             g2d.setColor(Color.WHITE);
         } else if (sqr.getStatus().getTeam() == Color.BLACK) {
             g2d.setColor(Color.RED);
         }
-        g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE,  SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE,  (model.length - sqr.getX()) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
         if (sqr.getStatus().isQueen()) {
             g2d.setColor(Color.BLACK);
-            g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE + SQUARE_SIZE / 3,  SQUARE_SIZE +(model.length - sqr.getX()) * SQUARE_SIZE + SQUARE_SIZE / 3, SQUARE_SIZE / 3, SQUARE_SIZE / 3);
+            g2d.fillOval(SQUARE_SIZE + (sqr.getYAxis() - 65) * SQUARE_SIZE + SQUARE_SIZE / 3, (model.length - sqr.getX()) * SQUARE_SIZE + SQUARE_SIZE / 3, SQUARE_SIZE / 3, SQUARE_SIZE / 3);
 
         }
     }

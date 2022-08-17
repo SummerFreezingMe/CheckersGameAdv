@@ -1,6 +1,6 @@
 package ru.vsu.cs.bykov.server;
 
-import ru.vsu.cs.bykov.Board;
+import ru.vsu.cs.bykov.game.Board;
 import ru.vsu.cs.bykov.utils.Reader;
 
 import java.awt.*;

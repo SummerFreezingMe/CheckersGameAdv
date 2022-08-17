@@ -1,4 +1,6 @@
-package ru.vsu.cs.bykov;
+package ru.vsu.cs.bykov.game;
+
+import ru.vsu.cs.bykov.game.Pawn;
 
 import java.awt.*;
 

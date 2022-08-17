@@ -1,4 +1,4 @@
-package ru.vsu.cs.bykov;
+package ru.vsu.cs.bykov.game;
 
 import java.awt.*;
 import java.util.ArrayList;

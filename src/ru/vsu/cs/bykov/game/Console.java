@@ -1,11 +1,10 @@
-package ru.vsu.cs.bykov;
+package ru.vsu.cs.bykov.game;
 
 import ru.vsu.cs.bykov.utils.GameStatus;
+import ru.vsu.cs.bykov.utils.Messenger;
 
 import java.awt.*;
 import java.util.Scanner;
-
-import static ru.vsu.cs.bykov.utils.GameStatus.END_GAME;
 
 public class Console {
     public  static void main(String[] args) {
@@ -16,12 +15,14 @@ public class Console {
     Scanner sc = new Scanner(System.in);
     Board board;
 
+    private Messenger msg;
 
     public void startGame() {
         System.out.println("Enter first player name: ");
         String firstPlayerName=sc.nextLine();
         System.out.println("Enter second player name: ");
         String secondPlayerName=sc.nextLine();
+        msg = new Messenger(firstPlayerName,secondPlayerName);
         board = new Board(firstPlayerName,secondPlayerName);
         board.createBoard();
         System.out.println("White goes first!");
@@ -30,7 +31,6 @@ public class Console {
                 drawBoard(board.getBoard());
                 endgame=moveInitializationConsole();
             }
-            board.messenger(END_GAME);
         }
     public void drawBoard(Square[][] board) {
         System.out.println("--------------------------------");
@@ -60,11 +60,11 @@ public class Console {
     }
 
     protected boolean moveInitializationConsole() {
-        board.messenger(GameStatus.CHOOSE_SQUARE);
+        msg.messenger(GameStatus.CHOOSE_SQUARE,-1);
         Scanner sc = new Scanner(System.in);
         String peak = sc.nextLine();
         peak = peak.toUpperCase();
-        board.messenger(GameStatus.CHOOSE_MOVE);
+        msg.messenger(GameStatus.CHOOSE_MOVE,-1);
         String hit = sc.nextLine();
         hit = hit.toUpperCase();
         Color currColor=board.getBoard()[Character.getNumericValue(peak.charAt(1) - 1)]

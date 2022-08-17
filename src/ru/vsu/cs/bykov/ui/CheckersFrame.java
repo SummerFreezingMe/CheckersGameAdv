@@ -1,6 +1,6 @@
 package ru.vsu.cs.bykov.ui;
 
-import ru.vsu.cs.bykov.Board;
+import ru.vsu.cs.bykov.game.Board;
 import ru.vsu.cs.bykov.server.Client;
 import ru.vsu.cs.bykov.utils.TextPrompt;
 
